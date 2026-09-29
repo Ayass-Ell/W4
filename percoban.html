@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Transaksi</title>
+</head>
+<body>
+    <h1>Data Transaksi</h1>
+    <button id="btnAdd">Tambah Data</button>
+    <br><br>
+    <form id="formTransaksi" style="display: none;">
+        ID Produk:
+        <input type="number" id="id_produk">
+        <br><br>
+        Jumlah:
+        <input type="number" id="jumlah">
+        <br><br>
+        <button type="submit" id="btnSubmit">Submit</button>
+        <button type="button" id="btnCancel">Cancel</button>
+
+    </form>
+    <br>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID Transaksi</th>
+                <th>Tanggal</th>
+                <th>ID Produk</th>
+                <th>Jumlah</th>
+                <th>Total Harga</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+
+        <tbody id="dataTransaksi"></tbody>
+    </table>
+    <script>
+        const readUrl =
+    "https://api.melangkah.my.id/transaksi/read.php";
+
+const createUrl =
+    "https://api.melangkah.my.id/transaksi/create.php";
+
+const updateUrl =
+    "https://api.melangkah.my.id/transaksi/update.php";
+        // READ
+        async function getData() {
+            const response = await fetch(readUrl);
+            const data = await response.json();
+            console.log(data);
+            let tabel = "";
+            data.forEach(item => {
+                tabel += `
+                    <tr>
+                        <td>${item.id_transaksi}</td>
+                        <td>${item.tanggal_transaksi}</td>
+                        <td>${item.id_produk}</td>
+                        <td>${item.jumlah}</td>
+                        <td>${item.total_harga}</td>
+                        <td>${item.status_transaksi}</td>
+                        <td>
+                            <button onclick="updateData(${item.id_transaksi})">
+                                Edit
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById("dataTransaksi").innerHTML = tabel;
+        }
+        // TAMPILKAN FORM
+        document.getElementById("btnAdd").onclick = function () {
+            document.getElementById("formTransaksi").style.display = "block";
+        };
+        // SEMBUNYIKAN FORM
+        document.getElementById("btnCancel").onclick = function () {
+            document.getElementById("formTransaksi").style.display = "none";
+        };
+        // CREATE
+        document.getElementById("formTransaksi").onsubmit =
+            async function (event) {
+                event.preventDefault();
+                const id_produk =
+                    document.getElementById("id_produk").value;
+                const jumlah =
+                    document.getElementById("jumlah").value;
+                const response = await fetch(createUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id_produk: id_produk,
+                        jumlah: jumlah
+                    })
+                });
+                const data = await response.json();
+                alert(data.message);
+                getData();
+            };
+        // UPDATE
+        async function updateData(id) {
+            const jumlah = prompt("Masukkan jumlah baru:");
+            if (jumlah == null) {
+                return;
+            }
+            const response = await fetch(updateUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id_transaksi: id,
+                    jumlah: jumlah
+                })
+            });
+            const data = await response.json();
+            alert(data.message);
+            getData();
+        }
+        // JALANKAN READ
+        getData();
+
+    </script>
+
+</body>
+
+</html>
